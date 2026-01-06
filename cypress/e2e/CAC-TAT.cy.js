@@ -24,7 +24,7 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     cy.get('#phone').type('ABCDE')
     cy.get('#phone').should('have.value', '');
   })
-  it.only('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', () => {
+  it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', () => {
     cy.get('#lastName').type('Venancio Barbosa');
     cy.get('#email').type('adrianoabner7.gmail.com');
     cy.get('#phone-checkbox').check();
@@ -118,7 +118,7 @@ describe('Central de Atendimento ao Cliente TAT', () => {
       })
   })
 
-  it.only('seleciona um arquivo da pasta fixtures pelo alias', () => {
+  it('seleciona um arquivo da pasta fixtures pelo alias', () => {
     cy.fixture('car.jpg').as('carro')
     cy.get('#file-upload').selectFile('@carro')
       .should(input => {
@@ -126,12 +126,12 @@ describe('Central de Atendimento ao Cliente TAT', () => {
 
       })
   })
-  it.only('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', () => {
+  it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', () => {
     cy.contains('a', 'Política de Privacidade')
       .should('have.attr', 'href', 'privacy.html')
       .and('have.attr', 'target', '_blank')
   })
-  it.only('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
+  it('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
     cy.contains('a', 'Política de Privacidade')
       .invoke('removeAttr', 'target')
       .click()
