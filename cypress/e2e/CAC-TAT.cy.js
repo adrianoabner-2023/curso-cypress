@@ -35,7 +35,7 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     cy.get('.error').should('be.visible');
   });
 
-  it.only('preenche e limpa os campos', () => {
+  it('preenche e limpa os campos', () => {
     cy.get('#firstName').type('Adriano').should('have.value', 'Adriano');
     cy.clearFormFields();
     cy.get('#firstName').should('have.value', '');
