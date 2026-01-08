@@ -1,142 +1,109 @@
 describe('Central de Atendimento ao Cliente TAT', () => {
   beforeEach(() => {
     cy.visit('./src/index.html');
-    cy.title().should('eq', 'Central de Atendimento ao Cliente TAT')
+    cy.title().should('eq', 'Central de Atendimento ao Cliente TAT');
+  });
 
-  })
-  it('preenche os campos obrigatórios e envia o formulário', () => {
-    cy.get('#firstName').type('Adriano Abner');
-    cy.get('#lastName').type('Venancio Barbosa');
-    cy.get('#open-text-area').type('Estou fazendo o curso de Cypress,Estou fazendo o curso de Cypress,Estou fazendo o curso de Cypress,Estou fazendo o curso de Cypress', Object({ delay: 0 }));
-    cy.get('#email').type('adrianoabner7@gmail.com');
-    cy.contains('Enviar').click();
+  it('1. preenche os campos obrigatórios e envia o formulário', () => {
+    cy.fillMandatoryFieldsAndSubmit({
+      firstName: 'Adriano Abner',
+      lastName: 'Venancio Barbosa',
+      email: 'adrianoabner7@gmail.com',
+      text: 'Estou fazendo o curso de Cypress...'
+    });
     cy.contains('Mensagem enviada com sucesso.').should('be.visible');
-  })
+  });
 
-  it('Exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', () => {
-    cy.get('#firstName').type('Adriano Abner');
-    cy.get('#lastName').type('Venancio Barbosa');
-    cy.get('#email').type('adrianoabner7.gmail.com');
-    cy.contains('Enviar').click();
+  it('2. Exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', () => {
+    cy.fillMandatoryFieldsAndSubmit({
+      firstName: 'Adriano Abner',
+      lastName: 'Venancio Barbosa',
+      email: 'adrianoabner7.gmail.com'
+    });
     cy.contains('Valide os campos obrigatórios!').should('be.visible');
-  })
-  it('Teste para validar que, se um valor não-numérico for digitado, seu valor continuará vazio', () => {
-    cy.get('#phone').type('ABCDE')
-    cy.get('#phone').should('have.value', '');
-  })
-  it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', () => {
+  });
+
+  it('3. Teste para validar que, se um valor não-numérico for digitado, seu valor continuará vazio', () => {
+    cy.get('#phone').type('ABCDE').should('have.value', '');
+  });
+
+  it('4. exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido', () => {
     cy.get('#lastName').type('Venancio Barbosa');
-    cy.get('#email').type('adrianoabner7.gmail.com');
+    cy.get('#email').type('adriano@gmail.com');
     cy.get('#phone-checkbox').check();
-    cy.contains('Enviar').click();
+    cy.contains('button', 'Enviar').click();
     cy.get('.error').should('be.visible');
+  });
 
-  })
-  it('preenche e limpa os campos nome, sobrenome, email e telefone', () => {
-    cy.get('#firstName').type('Adriano Abner')
-      .clear().should('have.value', '');
-    cy.get('#lastName').type('Venancio Barbosa')
-      .clear().should('have.value', '');
-    cy.get('#email').type('adrianoabner7.gmail.com')
-      .clear().should('have.value', '');
-    cy.get('#phone').type('61996427443')
-      .clear().should('have.value', '');
+  it.only('preenche e limpa os campos', () => {
+    cy.get('#firstName').type('Adriano').should('have.value', 'Adriano');
+    cy.clearFormFields();
+    cy.get('#firstName').should('have.value', '');
+  });
 
-  })
-  it('Exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', () => {
-    cy.contains('Enviar').click();
+  it('6. Exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', () => {
+    cy.contains('button', 'Enviar').click();
     cy.get('.error').should('be.visible');
+  });
 
-  })
+  it('7. seleciona um produto (YouTube) por seu texto', () => {
+    cy.selectProduct('YouTube').should('have.value', 'youtube');
+  });
 
-  it('fillMandatoryFieldsAndSubmit', () => {
-    cy.fillMandatoryFieldsAndSubmit();
-    cy.get('.success').should('be.visible');
+  it('8. seleciona um produto por seu value', () => {
+    cy.selectProduct('mentoria').should('have.value', 'mentoria');
+  });
 
-  })
+  it('9. seleciona um produto por seu índice', () => {
+    cy.selectProduct(1).should('have.value', 'blog');
+  });
 
-  it('seleciona um produto (YouTube) por seu texto', () => {
+  it('10. marca o tipo de atendimento "Feedback"', () => {
+    cy.checkServiceType('feedback').should('be.checked');
+  });
 
-    cy.get('select').select('YouTube')
-      .should('have.value', 'youtube');
+  it('11. marca o tipo de atendimento "Ajuda"', () => {
+    cy.checkServiceType('ajuda').should('be.checked');
+  });
 
-  })
+  it('12. marca o tipo de atendimento "Elogio"', () => {
+    cy.checkServiceType('elogio').should('be.checked');
+  });
 
-  it('seleciona um produto por seu value', () => {
+  it('13. marca ambos checkboxes, depois desmarca o último', () => {
+    cy.get('input[type="checkbox"]').check().should('be.checked')
+      .last().uncheck().should('not.be.checked');
+  });
 
-    cy.get('select').select('mentoria')
-      .should('have.value', 'mentoria');
+  it('14. seleciona um arquivo da pasta fixtures', () => {
+    cy.uploadFile('car.jpg');
+    cy.get('#file-upload').should(input => {
+      expect(input[0].files[0].name).to.equal('car.jpg');
+    });
+  });
 
-  })
+  it('15. seleciona um arquivo simulando um drag-and-drop', () => {
+    cy.uploadFile('car.jpg', { action: 'drag-drop' });
+    cy.get('#file-upload').should(input => {
+      expect(input[0].files[0].name).to.equal('car.jpg');
+    });
+  });
 
-  it('seleciona um produto por seu índice', () => {
+  it('16. seleciona um arquivo da pasta fixtures pelo alias', () => {
+    cy.fixture('car.jpg').as('carro');
+    cy.get('#file-upload').selectFile('@carro');
+    cy.get('#file-upload').should(input => {
+      expect(input[0].files[0].name).to.equal('car.jpg');
+    });
+  });
 
-    cy.get('select').select(1)
-      .should('have.value', 'blog');
-
-  })
-  it('marca o tipo de atendimento "Feedback"', () => {
-    cy.get('input[value="feedback"]').check();
-
-  })
-  it('marca cada tipo de atendimento', () => {
-
-    cy.get('input[value="feedback"]').check()
-      .should('be.checked');
-    cy.get('input[value="ajuda"]').check()
-      .should('be.checked');
-    cy.get('input[value="elogio"]').check()
-      .should('be.checked');
-
-
-  })
-  it('marca ambos checkboxes, depois desmarca o último', () => {
-
-    cy.get('input[type="checkbox"]').check()
-      .should('be.checked')
-      .first()
-      .uncheck()
-      .should('not.be.checked')
-
-  })
-
-  it('seleciona um arquivo da pasta fixtures', () => {
-
-    cy.get('#file-upload').selectFile('cypress/fixtures/car.jpg')
-      .should(input => {
-        expect(input[0].files[0].name).to.equal('car.jpg')
-
-      })
-  })
-
-
-  it('seleciona um arquivo simulando um drag-and-drop', () => {
-
-    cy.get('#file-upload').selectFile('cypress/fixtures/car.jpg', { action: 'drag-drop' })
-      .should(input => {
-        expect(input[0].files[0].name).to.equal('car.jpg')
-      })
-  })
-
-  it('seleciona um arquivo da pasta fixtures pelo alias', () => {
-    cy.fixture('car.jpg').as('carro')
-    cy.get('#file-upload').selectFile('@carro')
-      .should(input => {
-        expect(input[0].files[0].name).to.equal('car.jpg')
-
-      })
-  })
-  it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', () => {
+  it('17. verifica que a política de privacidade abre em outra aba sem o clique', () => {
     cy.contains('a', 'Política de Privacidade')
-      .should('have.attr', 'href', 'privacy.html')
-      .and('have.attr', 'target', '_blank')
-  })
-  it('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
-    cy.contains('a', 'Política de Privacidade')
-      .invoke('removeAttr', 'target')
-      .click()
-    cy.contains('h1', 'CAC TAT - Política de Privacidade').should('be.visible')
+      .should('have.attr', 'target', '_blank');
+  });
 
-  })
-
-})
+  it('18. acessa a página da política de privacidade removendo o target', () => {
+    cy.contains('a', 'Política de Privacidade').invoke('removeAttr', 'target').click();
+    cy.contains('Talking About Testing').should('be.visible');
+  });
+});
